@@ -135,10 +135,20 @@ elif menu == "확률 시뮬레이터":
         ["동전", "주사위"]
     )
 
-    # ----------------------------------------------
-    # 동전
-    # ----------------------------------------------
+    # 동전 선택 시 수학적 확률 계산 함수
+    def get_theoretical_probability_coin(event):
+        return 0.5
 
+    # 주사위 선택 시 수학적 확률 계산 함수
+    def get_theoretical_probability_dice(event):
+        if event in ["1", "2", "3", "4", "5", "6"]:
+            return 1 / 6
+        elif event == "짝수":
+            return 3 / 6  # 2, 4, 6
+        elif event == "홀수":
+            return 3 / 6  # 1, 3, 5
+
+    # 사건 선택
     if simulator_type == "동전":
 
         event = st.selectbox(
@@ -146,9 +156,7 @@ elif menu == "확률 시뮬레이터":
             ["앞면", "뒷면"]
         )
 
-    # ----------------------------------------------
-    # 주사위
-    # ----------------------------------------------
+        theoretical_probability = get_theoretical_probability_coin(event)
 
     else:
 
@@ -165,6 +173,8 @@ elif menu == "확률 시뮬레이터":
                 "홀수"
             ]
         )
+
+        theoretical_probability = get_theoretical_probability_dice(event)
 
     # ==================================================
     # 세션 상태 초기화
@@ -271,14 +281,14 @@ elif menu == "확률 시뮬레이터":
 
     if st.session_state.total_trials > 0:
 
-        probability = (
+        experimental_probability = (
             st.session_state.total_success
             / st.session_state.total_trials
         )
 
     else:
 
-        probability = 0
+        experimental_probability = 0
 
     st.divider()
 
@@ -290,8 +300,45 @@ elif menu == "확률 시뮬레이터":
         f"누적 시행 횟수: {st.session_state.total_trials}"
     )
 
+    # 실험 확률 표시
     st.metric(
         "누적 실험 확률",
-        f"{probability:.4f}"
+        f"{experimental_probability:.4f}"
     )
 
+    st.divider()
+
+    # ==================================================
+    # 수학적 확률 표시
+    # ==================================================
+
+    st.subheader("📐 수학적 확률 (이론적 확률)")
+
+    if simulator_type == "동전":
+        st.metric(
+            f"'{event}'이 나올 확률",
+            f"{theoretical_probability:.4f}",
+            help="동전 한 번 던질 때 앞면이 나올 확률은 1/2"
+        )
+
+    else:
+        if event in ["1", "2", "3", "4", "5", "6"]:
+            st.metric(
+                f"주사위에서 '{event}'이 나올 확률",
+                f"{theoretical_probability:.4f}",
+                help=f"주사위 한 번 던질 때 특정 숫자가 나올 확률은 1/6"
+            )
+
+        elif event == "짝수":
+            st.metric(
+                f"주사위에서 '짝수'가 나올 확률",
+                f"{theoretical_probability:.4f}",
+                help=f"짝수: 2, 4, 6 → 확률 = 3/6 = 1/2"
+            )
+
+        elif event == "홀수":
+            st.metric(
+                f"주사위에서 '홀수'가 나올 확률",
+                f"{theoretical_probability:.4f}",
+                help=f"홀수: 1, 3, 5 → 확률 = 3/6 = 1/2"
+            )
